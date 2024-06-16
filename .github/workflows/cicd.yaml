@@ -1,0 +1,36 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Minikube
+        run: |
+          curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
+          sudo install minikube-linux-amd64 /usr/local/bin/minikube
+          minikube start --driver=none
+
+      - name: Use Minikube's Docker daemon
+        run: eval $(minikube docker-env)
+
+      - name: Build Docker image
+        run: docker build -t wisecow:v1 ./Container/
+
+      - name: Set up kubectl
+        uses: azure/setup-kubectl@v1
+        with:
+          version: 'v1.18.0'
+
+      - name: Deploy to Kubernetes
+        run: |
+          kubectl apply -f Kubernetes-manifests/wisecow-deployment.yaml
+          kubectl apply -f Kubernetes-manifests/wisecow-service.yaml
