@@ -21,12 +21,18 @@ jobs:
           sudo tar zxvf crictl-v1.25.0-linux-amd64.tar.gz -C /usr/local/bin
           rm crictl-v1.25.0-linux-amd64.tar.gz
 
+          # Install the latest version of Go
+          GO_VERSION=1.20.0
+          curl -LO https://golang.org/dl/go$GO_VERSION.linux-amd64.tar.gz
+          sudo tar -C /usr/local -xzf go$GO_VERSION.linux-amd64.tar.gz
+          echo "export PATH=\$PATH:/usr/local/go/bin" >> $GITHUB_ENV
+
           # Install cri-dockerd
-          sudo apt-get install -y golang-go
           git clone https://github.com/Mirantis/cri-dockerd.git
           cd cri-dockerd
           mkdir bin
-          go get && go build -o bin/cri-dockerd
+          /usr/local/go/bin/go get
+          /usr/local/go/bin/go build -o bin/cri-dockerd
           sudo install bin/cri-dockerd /usr/local/bin/
           sudo cri-dockerd &
 
