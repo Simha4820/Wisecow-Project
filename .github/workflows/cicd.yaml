@@ -21,6 +21,15 @@ jobs:
           sudo tar zxvf crictl-v1.25.0-linux-amd64.tar.gz -C /usr/local/bin
           rm crictl-v1.25.0-linux-amd64.tar.gz
 
+          # Install cri-dockerd
+          sudo apt-get install -y golang-go
+          git clone https://github.com/Mirantis/cri-dockerd.git
+          cd cri-dockerd
+          mkdir bin
+          go get && go build -o bin/cri-dockerd
+          sudo install bin/cri-dockerd /usr/local/bin/
+          sudo cri-dockerd &
+
       - name: Set up Minikube
         run: |
           curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
@@ -31,7 +40,7 @@ jobs:
         run: eval $(minikube docker-env)
 
       - name: Build Docker image
-        run: docker build -t wisecow:v1 ./Container/
+        run: docker build -t wisecow:v1 ./Containers/
 
       - name: Set up kubectl
         uses: azure/setup-kubectl@v1
